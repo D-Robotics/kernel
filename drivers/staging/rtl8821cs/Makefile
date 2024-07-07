@@ -1736,16 +1736,9 @@ EXTRA_CFLAGS += -DCONFIG_IOCTL_CFG80211 -DRTW_USE_CFG80211_STA_EVENT
 EXTRA_CFLAGS += -DCONFIG_QOS_OPTIMIZATION
 EXTRA_CFLAGS += -Wno-error=date-time
 ARCH := arm64
-# ==== Cross compile setting for Android 4.4 SDK =====
-#CROSS_COMPILE := arm-linux-gnueabihf-
-#KVER  := 4.1.10
-#CROSS_COMPILE := $(CROSS)
-#KSRC := $(LINUX_KERNEL_PATH)
-CROSS_COMPILE :=  /opt/gcc-ubuntu-9.3.0-2020.03-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-
+CROSS_COMPILE := /opt/gcc-arm-11.2-2022.02-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
 KVER  := 4.14.87
-# KSRC := /mnt/data/users/luojiale/xx/boot/kernel
 endif
-
 
 
 ifeq ($(CONFIG_PLATFORM_ARM_RK3066), y)
