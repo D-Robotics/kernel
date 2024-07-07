@@ -1,0 +1,6 @@
+config RTL8812BU
+	tristate "Realtek 8812B USB WiFi"
+	depends on USB
+	---help---
+	  Help message of RTL8812BU
+
