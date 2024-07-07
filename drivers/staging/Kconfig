@@ -46,6 +46,8 @@ source "drivers/staging/rtl8821cs/Kconfig"
 
 source "drivers/staging/rtl8812bu/Kconfig"
 
+source "drivers/staging/rtl88x2cu/Kconfig"
+
 source "drivers/staging/rtl8712/Kconfig"
 
 source "drivers/staging/rtl8188eu/Kconfig"

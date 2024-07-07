@@ -15,6 +15,7 @@ obj-$(CONFIG_RTL8723BS)		+= rtl8723bs/
 obj-$(CONFIG_RTL8723DS)		+= rtl8723ds/
 obj-$(CONFIG_RTL8821CS)		+= rtl8821cs/
 obj-$(CONFIG_RTL8812BU)		+= rtl8812bu/
+obj-$(CONFIG_RTL88x2CU)		+= rtl88x2cu/
 obj-$(CONFIG_R8712U)		+= rtl8712/
 obj-$(CONFIG_R8188EU)		+= rtl8188eu/
 obj-$(CONFIG_R8822BE)		+= rtlwifi/
