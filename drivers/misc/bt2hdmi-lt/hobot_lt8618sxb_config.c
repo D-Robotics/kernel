@@ -666,10 +666,15 @@ int LT8618SXB_Read_EDID(hobot_hdmi_sync_t * sync)
 				}
 				if (i == 3) {
 					if (extended_flag < 1) { //no block 1, stop reading edid.
+						memset(&edid_raw_data, 0, sizeof(edid_raw_t));
+						memcpy(&edid_raw_data.edid_data, Sink_EDID, 256*sizeof(uint8_t));
+						memcpy(&edid_raw_data.edid_data2,Sink_EDID2,256*sizeof(uint8_t));
+						edid_raw_data.block_num = 0; // main block only
+						// printk("edid_raw_data.block_num = %d\n", edid_raw_data.block_num);
 						hobot_write_lt8618sxb(0x03, 0xc2);
 						hobot_write_lt8618sxb(0x07, 0x1f);
 						pr_debug("EDID:Only 1 block\n");
-						//printk("LT8618SXB_Read_EDID 11 out\n");
+						printk("LT8618SXB_Read_EDID 11 out\n");
 						return 0;
 					}
 				}
