@@ -614,12 +614,12 @@ static int hbfb_set_par(struct fb_info *info)
 		info->var.bits_per_pixel = 24;
 	}
 
-	user_config(1920,info->var.yres_virtual,info->var.xres,info->var.yres);
+	user_config(info->var.xres_virtual,info->var.yres_virtual,info->var.xres,info->var.yres);
 	if(ubuntu_desktop == 0){
 		info->fix.line_length = get_line_length(info->var.xres_virtual,24);
 
 	}else{
-		info->fix.line_length = get_line_length(1920,24);
+		info->fix.line_length = get_line_length(info->var.xres_virtual,24);
 		memcpy(&store_chn_cfg,&channel_base_cfg[0],sizeof(channel_base_cfg_t));
 	}
 	iar_timing.hfp = info->var.right_margin;
@@ -1114,16 +1114,12 @@ static int hbfb_probe(struct platform_device *pdev)
 	framebuf_user1 = *hobot_iar_get_framebuf_addr(3);
 	pr_debug("framebuf_user.paddr = 0x%llx\n", framebuf_user.paddr);
 	pr_debug("framebuf_uset.vaddr = 0x%p\n", framebuf_user.vaddr);
-
-	frame_size = IAR_MAX_HEIGHT * IAR_MAX_WIDTH * 4; //RGBA 
-	
 	pr_debug("frame_size is %d\n", frame_size);
-
-
 
 	fb_fix_default.smem_start = framebuf_user.paddr;
 
 	hobot_fbi->fb.var = fb_var_default;
+	frame_size = IAR_MAX_HEIGHT * IAR_MAX_WIDTH * 4; //RGBA
 
 	//We assume that the output mode at this time is bt1120 and try to get edid.
 	if (1)
