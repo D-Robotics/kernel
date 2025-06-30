@@ -674,7 +674,7 @@ int LT8618SXB_Read_EDID(hobot_hdmi_sync_t * sync)
 						hobot_write_lt8618sxb(0x03, 0xc2);
 						hobot_write_lt8618sxb(0x07, 0x1f);
 						pr_debug("EDID:Only 1 block\n");
-						printk("LT8618SXB_Read_EDID 11 out\n");
+						// printk("LT8618SXB_Read_EDID 11 out\n");
 						return 0;
 					}
 				}
