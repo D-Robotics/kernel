@@ -1126,9 +1126,10 @@ static int hbfb_probe(struct platform_device *pdev)
 	{
 		extern edid_raw_t edid_raw_data;
 		struct fb_info* info = &hobot_fbi->fb;
-		if(edid_raw_data.edid_data && edid_raw_data.block_num != -1){
+
+		if (edid_raw_data.block_num != -1) {
 			edid = edid_raw_data.edid_data;
-		}else{
+		} else {
 			edid = dummy_edid;
 		}
 		if (edid) {
@@ -1141,8 +1142,53 @@ static int hbfb_probe(struct platform_device *pdev)
 				fb_videomode_to_modelist(info->monspecs.modedb,
 							info->monspecs.modedb_len,
 							&info->modelist);
-				m = fb_find_best_display(&info->monspecs, &info->modelist);
+				pr_debug("hobot-fb: monspecs modedb_len=%d\n", info->monspecs.modedb_len);
+
+				/*
+				 * Prefer an EDID mode within 1920x1080 cap to avoid selecting
+				 * EDID-preferred 1920x1200 which some boards/panels cannot display
+				 * correctly in this pipeline.
+				 */
+				{
+					const struct fb_videomode *best_cap = NULL;
+					u32 best_area = 0;
+					u32 best_refresh = 0;
+					int i;
+
+					for (i = 0; i < info->monspecs.modedb_len; i++) {
+						const struct fb_videomode *cand = &info->monspecs.modedb[i];
+						u32 area;
+						u32 refresh;
+
+						if (!cand->xres || !cand->yres)
+							continue;
+						if (cand->xres > IAR_MAX_WIDTH || cand->yres > IAR_MAX_HEIGHT)
+							continue;
+
+						area = cand->xres * cand->yres;
+						refresh = cand->refresh;
+
+						if (!best_cap ||
+							area > best_area ||
+							(area == best_area && refresh > best_refresh)) {
+							best_cap = cand;
+							best_area = area;
+							best_refresh = refresh;
+						}
+					}
+
+					if (best_cap) {
+						m = best_cap;
+						pr_debug("hobot-fb: best mode within cap: %ux%u@%uHz\n",
+							m->xres, m->yres, m->refresh);
+					} else {
+						m = fb_find_best_display(&info->monspecs, &info->modelist);
+						pr_debug("hobot-fb: no EDID mode within cap, fallback to fb_find_best_display\n");
+					}
+				}
 				if (m) {
+					pr_debug("hobot-fb: best mode from EDID: %ux%u@%uHz (pixclock=%u)\n",
+						m->xres, m->yres, m->refresh, m->pixclock);
 					fb_videomode_to_var(&info->var, m);
 					/* fill all other info->var's fields */
 				}
