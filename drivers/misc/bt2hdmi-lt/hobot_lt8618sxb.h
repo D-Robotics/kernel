@@ -92,6 +92,8 @@ typedef struct edid_raw
 extern edid_raw_t edid_raw_data;
 extern int LT8618SXB_Chip_ID(void);
 extern void LT8618SX_Initial(void);
+/* Return 1 when HDMI/HPD is detected high, else 0. */
+extern u8 LT8618SXB_HPD_status(void);
 void Resolution_change(hobot_hdmi_sync_t* timing);
 int LT8618SXB_Read_EDID(hobot_hdmi_sync_t * sync);
 #endif

@@ -81,6 +81,8 @@ typedef struct hdmi_timing
 #define LT8618_GET_EDID_RESOLUTION_RATIO LT8618_IOR(100, hobot_hdmi_sync_t)
 #define LT8618_GET_EDID_RAW LT8618_IOR(103, edid_raw_t)
 #define LT8618_SET_EDID_TIMING LT8618_IOW(102, hdmi_timing_t)
+/* Get HDMI connected status (HPD high => 1, else 0) */
+#define LT8618_GET_HDMI_CONNECTED LT8618_IOR(106, unsigned int)
 // #define LT8618_SET_POLARITY	    LT8618_IOW(102, unsigned int)
 // #define LT8618_GET_POLARITY		LT8618_IOR(103, unsigned int)
 // #define LT8618_ENABLE	        LT8618_IO(104)
@@ -139,6 +141,15 @@ static long lt8618_ioctl(struct file *file, unsigned int cmd,
 	case LT8618_GET_EDID_RAW:
 	{
 		if (copy_to_user((void __user *)arg, &edid_raw_data, sizeof(edid_raw_t)))
+			r = -EFAULT;
+		break;
+	}
+	case LT8618_GET_HDMI_CONNECTED:
+	{
+		unsigned int connected = 0;
+		u8 hpd = LT8618SXB_HPD_status();
+		connected = (hpd != 0) ? 1 : 0;
+		if (copy_to_user((void __user *)arg, &connected, sizeof(unsigned int)))
 			r = -EFAULT;
 		break;
 	}
