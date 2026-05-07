@@ -204,8 +204,8 @@
 
 			i2c1_func: i2c1_func {
 				pinctrl-single,pins = <
-					0x028	(MUX_F0 | DRIVE1_03MA | SCHMITT1_DIS | PULL1_UP) /*i2c1 SCL*/
-					0x02c	(MUX_F0 | DRIVE1_03MA | SCHMITT1_DIS | PULL1_UP) /*i2c1 SDA*/
+					0x028	(MUX_F0 | DRIVE1_41MA | SCHMITT1_DIS | PULL1_UP) /*i2c1 SCL*/
+					0x02c	(MUX_F0 | DRIVE1_41MA | SCHMITT1_DIS | PULL1_UP) /*i2c1 SDA*/
 				>;
 			};
 
