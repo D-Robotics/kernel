@@ -2231,6 +2231,11 @@ int32_t iar_start(int update)
 	writel(0x1, g_iar_dev->regaddr + REG_IAR_UPDATE);
 	if (display_type == MIPI_720P_TOUCH) {
 		panel_exit_standby();
+	} else if (display_type == MIPI_480P) {
+		panel_exit_standby();
+		/* Same as iar_test_attr cm480p: reprogram DSI CM480 timing/pipeline */
+		if (set_mipi_display(4))
+			pr_err("set_mipi_display(4) failed\n");
 	} else if (display_type == LCD_7_TYPE) {
 		ret = disp_pinmux_rgb();
 		if (ret)
@@ -2312,6 +2317,9 @@ int32_t iar_stop(void)
 	}
 	if (display_type == MIPI_720P_TOUCH)
 		panel_enter_standby();
+	else if (display_type == MIPI_480P) {
+		panel_enter_standby();
+	}
 	if (g_iar_dev->iar_task == NULL) {
 		pr_err("iar vio thread already stop!!\n");
 	} else {
