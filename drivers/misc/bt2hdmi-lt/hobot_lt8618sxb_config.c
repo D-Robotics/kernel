@@ -1819,8 +1819,83 @@ int hdmi_get_edid(void *param){
 	return ret;
 }
 EXPORT_SYMBOL(hdmi_get_edid);
-void hdmi_set_resolution(hobot_hdmi_sync_t* user_timing){
-	Resolution_change(user_timing);
+
+/*
+ * Transition policy for modeset stripe issue.
+ * 0: disabled
+ * 1: DMT only (vic == 0) [default]
+ * 2: all modes
+ */
+static int hdmi_transition_policy = 1;
+module_param_named(hdmi_transition, hdmi_transition_policy, int, 0644);
+MODULE_PARM_DESC(hdmi_transition,
+	"LT8618 modeset transition: 0=off, 1=DMT only(vic==0), 2=all modes");
+
+static bool lt8618sxb_timing_equal(const hobot_hdmi_sync_t *a,
+				  const hobot_hdmi_sync_t *b)
+{
+	return a->hfp == b->hfp &&
+	       a->hs == b->hs &&
+	       a->hbp == b->hbp &&
+	       a->hact == b->hact &&
+	       a->vfp == b->vfp &&
+	       a->vs == b->vs &&
+	       a->vbp == b->vbp &&
+	       a->vact == b->vact &&
+	       a->clk == b->clk &&
+	       a->vic == b->vic;
+}
+
+void hdmi_set_resolution(hobot_hdmi_sync_t* user_timing)
+{
+	bool need_transition = false;
+	bool mode_changed = true;
+	static bool last_valid;
+	static hobot_hdmi_sync_t last_timing;
+
+	if (!user_timing)
+		return;
+
+	if (last_valid)
+		mode_changed = !lt8618sxb_timing_equal(user_timing, &last_timing);
+
+	/* Decide transition by policy, and avoid doing it when timing is unchanged. */
+	if (mode_changed) {
+		if (hdmi_transition_policy >= 2) {
+			need_transition = true;
+		} else if (hdmi_transition_policy == 1) {
+			need_transition = (user_timing->vic == 0);
+		}
+	}
+
+	if (g_x2_lt8618sxb)
+		mutex_lock(&g_x2_lt8618sxb->lt8618sxb_mutex);
+
+	if (need_transition) {
+		/* Mute HDMI TX output to avoid sink sampling unstable frames. */
+		LT8618SXB_HDMI_TX_En(false);
+		msleep(80);
+
+		/* Reset internal video process logic before applying new timing. */
+		LT8618SXB_RST_PD_Init();
+		msleep(20);
+
+		Resolution_change(user_timing);
+		msleep(120);
+
+		/* Re-enable TX after timing/PLL has settled. */
+		LT8618SXB_HDMI_TX_En(true);
+		msleep(80);
+	} else {
+		Resolution_change(user_timing);
+	}
+
+	/* Remember last timing to avoid repeated transition on no-op sets. */
+	last_timing = *user_timing;
+	last_valid = true;
+
+	if (g_x2_lt8618sxb)
+		mutex_unlock(&g_x2_lt8618sxb->lt8618sxb_mutex);
 }
 EXPORT_SYMBOL(hdmi_set_resolution);
 /***********************************************************
