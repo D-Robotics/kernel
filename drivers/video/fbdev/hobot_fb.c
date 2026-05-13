@@ -603,12 +603,10 @@ int user_config(uint32_t src_w, uint32_t src_h,uint32_t dst_w, uint32_t dst_h)
 static int hbfb_set_par(struct fb_info *info)
 {
 	// dump_stack();
-	int ret = 0;
 	unsigned int layer_width = 0;
 	unsigned int layer_height = 0;
 	struct disp_timing iar_timing;
 	hobot_hdmi_sync_t hdmi_timing;
-	uint64_t iar_pixel_clk = 0;
 	extern channel_base_cfg_t store_chn_cfg;
 	if (info->var.bits_per_pixel == 32) {
 		info->var.bits_per_pixel = 24;
@@ -631,10 +629,9 @@ static int hbfb_set_par(struct fb_info *info)
 	iar_timing.vfp_cnt = 0X0;
 
 	disp_set_panel_timing(&iar_timing);
-	
+	disp_set_pixel_clk(info->var.pixclock ?
+			   1000000000000ULL / info->var.pixclock : 0);
 
-	disp_set_pixel_clk(1000000000000 / info->var.pixclock);
-	
 	if (enable_sif_mclk() != 0)
 		return -1;
 	if (iar_pixel_clk_enable() != 0)
